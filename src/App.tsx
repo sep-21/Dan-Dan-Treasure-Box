@@ -29,6 +29,8 @@ type DrawBox = Rect & {
   color: string;
 };
 
+const FILL_BOX_COLOR = "#000000";
+
 const modes: Array<{ id: Mode; label: string; icon: typeof Crop }> = [
   { id: "crop", label: "MP4 编辑", icon: Crop },
   { id: "compress", label: "压缩动图", icon: Gauge },
@@ -119,7 +121,6 @@ export function App() {
   const [drawStart, setDrawStart] = useState<{ x: number; y: number } | null>(null);
   const [isCropEditing, setIsCropEditing] = useState(false);
   const [editTool, setEditTool] = useState<"crop" | "box">("crop");
-  const [boxColor, setBoxColor] = useState("#c9ebe6");
   const [drawBoxes, setDrawBoxes] = useState<DrawBox[]>([]);
   const [draftBox, setDraftBox] = useState<Rect | null>(null);
   const [status, setStatus] = useState("准备好");
@@ -387,7 +388,7 @@ export function App() {
         if (normalized.width > 4 && normalized.height > 4) {
           setDrawBoxes((currentBoxes) => [
             ...currentBoxes,
-            { ...normalized, color: boxColor, id: `${Date.now()}-${currentBoxes.length}` },
+            { ...normalized, color: FILL_BOX_COLOR, id: `${Date.now()}-${currentBoxes.length}` },
           ]);
         }
       }
@@ -437,8 +438,13 @@ export function App() {
     const baseRect = rect && realCrop ? realCrop : fullSourceRect;
     const scaleX = cropInfo.width / stageSize.width;
     const scaleY = cropInfo.height / stageSize.height;
+    const visibleBoxes = [...drawBoxes];
 
-    return drawBoxes
+    if (editTool === "box" && draftBox && draftBox.width > 4 && draftBox.height > 4) {
+      visibleBoxes.push({ ...draftBox, color: FILL_BOX_COLOR, id: "active-draft-box" });
+    }
+
+    return visibleBoxes
       .map((box) => {
         const sourceX = box.x * scaleX;
         const sourceY = box.y * scaleY;
@@ -815,7 +821,7 @@ export function App() {
                           <div
                             className="drawBox draftDrawBox"
                             style={{
-                              backgroundColor: boxColor,
+                              backgroundColor: FILL_BOX_COLOR,
                               left: `${draftBox.x}px`,
                               top: `${draftBox.y}px`,
                               width: `${Math.max(2, draftBox.width)}px`,
@@ -881,18 +887,6 @@ export function App() {
                       <Square size={16} />
                       矩形
                     </button>
-                  </div>
-                  <div className="colorSwatches" aria-label="矩形颜色">
-                    {["#c9ebe6", "#ff4d4f", "#2f6bff", "#ffd166", "#11151b"].map((color) => (
-                      <button
-                        className={boxColor === color ? "active" : ""}
-                        key={color}
-                        style={{ backgroundColor: color }}
-                        type="button"
-                        onClick={() => setBoxColor(color)}
-                        aria-label={`选择颜色 ${color}`}
-                      />
-                    ))}
                   </div>
                   {editTool === "crop" ? (
                     <button className="secondaryButton slimButton" type="button" onClick={() => setRect(null)} disabled={!rect}>

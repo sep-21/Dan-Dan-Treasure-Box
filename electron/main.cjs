@@ -174,7 +174,7 @@ ipcMain.handle("crop-mp4", async (_event, payload) => {
   }
   const boxes = Array.isArray(payload.boxes) ? payload.boxes : [];
   for (const box of boxes) {
-    const color = String(box.color || "#c9ebe6").replace("#", "0x");
+    const color = String(box.color || "#000000").replace("#", "0x");
     const x = Math.max(0, Math.round(Number(box.x || 0)));
     const y = Math.max(0, Math.round(Number(box.y || 0)));
     const width = Math.max(2, Math.round(Number(box.width || 2)));
