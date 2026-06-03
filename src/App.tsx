@@ -410,6 +410,33 @@ export function App() {
     setDrawStart(null);
   }
 
+  function cancelEditSession() {
+    finishDraw();
+    if (editTool === "crop") {
+      setRect(null);
+    } else {
+      setDraftBox(null);
+      setDrawBoxes([]);
+    }
+    setIsDrawing(false);
+    setDrawStart(null);
+    setIsCropEditing(false);
+  }
+
+  function switchEditTool(nextTool: "crop" | "box") {
+    if (nextTool === editTool) return;
+    finishDraw();
+    if (nextTool === "crop") {
+      setDraftBox(null);
+      setDrawBoxes([]);
+    } else {
+      setRect(null);
+    }
+    setIsDrawing(false);
+    setDrawStart(null);
+    setEditTool(nextTool);
+  }
+
   function realDrawBoxes() {
     if (!cropInfo || !fullSourceRect || stageSize.width <= 0 || stageSize.height <= 0) return [];
     const baseRect = rect && realCrop ? realCrop : fullSourceRect;
@@ -752,7 +779,8 @@ export function App() {
                       aria-label={isCropEditing ? "取消编辑" : "编辑裁剪区域"}
                       onClick={() => {
                         if (isCropEditing) {
-                          finishDraw();
+                          cancelEditSession();
+                          return;
                         }
                         setIsCropEditing((current) => !current);
                       }}
@@ -850,11 +878,11 @@ export function App() {
               {isCropEditing ? (
                 <div className="editToolPanel">
                   <div className="segmentedTools">
-                    <button className={editTool === "crop" ? "active" : ""} type="button" onClick={() => setEditTool("crop")}>
+                    <button className={editTool === "crop" ? "active" : ""} type="button" onClick={() => switchEditTool("crop")}>
                       <Scissors size={16} />
                       裁剪
                     </button>
-                    <button className={editTool === "box" ? "active" : ""} type="button" onClick={() => setEditTool("box")}>
+                    <button className={editTool === "box" ? "active" : ""} type="button" onClick={() => switchEditTool("box")}>
                       <Square size={16} />
                       矩形
                     </button>
@@ -871,10 +899,17 @@ export function App() {
                       />
                     ))}
                   </div>
-                  <button className="secondaryButton slimButton" type="button" onClick={() => setDrawBoxes([])} disabled={drawBoxes.length === 0}>
-                    <Trash2 size={16} />
-                    清空矩形
-                  </button>
+                  {editTool === "crop" ? (
+                    <button className="secondaryButton slimButton" type="button" onClick={() => setRect(null)} disabled={!rect}>
+                      <Trash2 size={16} />
+                      清除裁剪
+                    </button>
+                  ) : (
+                    <button className="secondaryButton slimButton" type="button" onClick={() => setDrawBoxes([])} disabled={drawBoxes.length === 0}>
+                      <Trash2 size={16} />
+                      清空矩形
+                    </button>
+                  )}
                 </div>
               ) : null}
 

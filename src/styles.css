@@ -937,7 +937,8 @@ input {
 }
 
 .brandPill {
-  min-width: 214px;
+  width: fit-content;
+  min-width: 0;
   min-height: 62px;
   padding: 13px 20px;
   color: #11151b;
@@ -1278,8 +1279,8 @@ input {
 }
 
 .compactBrand {
-  min-width: 318px;
-  min-height: 76px;
+  min-width: 0;
+  min-height: 62px;
 }
 
 .topNav {
