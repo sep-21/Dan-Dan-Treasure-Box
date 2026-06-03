@@ -7,6 +7,7 @@ export type SelectedMedia = {
 export type CropPayload = {
   inputPath: string;
   outputPath: string;
+  crop?: boolean;
   x: number;
   y: number;
   width: number;

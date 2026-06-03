@@ -167,7 +167,10 @@ ipcMain.handle("probe-media", async (_event, filePath) => {
 
 ipcMain.handle("crop-mp4", async (_event, payload) => {
   const ffmpeg = resolveTool("ffmpeg");
-  const crop = `crop=${payload.width}:${payload.height}:${payload.x}:${payload.y}`;
+  const filters = [];
+  if (payload.crop !== false) {
+    filters.push(`crop=${payload.width}:${payload.height}:${payload.x}:${payload.y}`);
+  }
   const boxes = Array.isArray(payload.boxes) ? payload.boxes : [];
   const drawBoxes = boxes
     .map((box) => {
@@ -176,17 +179,18 @@ ipcMain.handle("crop-mp4", async (_event, payload) => {
       const y = Math.max(0, Math.round(Number(box.y || 0)));
       const width = Math.max(2, Math.round(Number(box.width || 2)));
       const height = Math.max(2, Math.round(Number(box.height || 2)));
-      return `drawbox=x=${x}:y=${y}:w=${width}:h=${height}:color=${color}@0.72:t=fill`;
+      return `drawbox=x=${x}:y=${y}:w=${width}:h=${height}:color=${color}@1:t=fill`;
     })
     .join(",");
-  const videoFilter = drawBoxes ? `${crop},${drawBoxes}` : crop;
+  if (drawBoxes) {
+    filters.push(drawBoxes);
+  }
+  const videoFilter = filters.join(",");
 
-  await runTool(ffmpeg, [
+  const args = [
     "-y",
     "-i",
     payload.inputPath,
-    "-vf",
-    videoFilter,
     "-c:v",
     "libx264",
     "-crf",
@@ -196,7 +200,13 @@ ipcMain.handle("crop-mp4", async (_event, payload) => {
     "-c:a",
     payload.keepAudio ? "copy" : "aac",
     payload.outputPath,
-  ]);
+  ];
+
+  if (videoFilter) {
+    args.splice(3, 0, "-vf", videoFilter);
+  }
+
+  await runTool(ffmpeg, args);
 
   return { outputPath: payload.outputPath };
 });

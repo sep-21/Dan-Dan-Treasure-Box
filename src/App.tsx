@@ -114,7 +114,7 @@ export function App() {
   const [mediaByMode, setMediaByMode] = useState(initialMediaState);
   const [infoByMode, setInfoByMode] = useState(initialInfoState);
   const [resultByMode, setResultByMode] = useState(initialResultState);
-  const [rect, setRect] = useState<Rect>({ x: 80, y: 60, width: 360, height: 240 });
+  const [rect, setRect] = useState<Rect | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawStart, setDrawStart] = useState<{ x: number; y: number } | null>(null);
   const [isCropEditing, setIsCropEditing] = useState(false);
@@ -168,8 +168,19 @@ export function App() {
     return () => observer.disconnect();
   }, [cropMedia, cropInfo, isCropEditing, mode]);
 
+  const fullSourceRect = useMemo(() => {
+    if (!cropInfo) return null;
+    return {
+      x: 0,
+      y: 0,
+      width: even(cropInfo.width),
+      height: even(cropInfo.height),
+    };
+  }, [cropInfo]);
+
   const realCrop = useMemo(() => {
     if (!cropInfo || stageSize.width <= 0 || stageSize.height <= 0) return null;
+    if (!rect) return fullSourceRect;
     const scaleX = cropInfo.width / stageSize.width;
     const scaleY = cropInfo.height / stageSize.height;
 
@@ -184,7 +195,8 @@ export function App() {
       width: even(cropWidth),
       height: even(cropHeight),
     };
-  }, [cropInfo, rect, stageSize]);
+  }, [cropInfo, fullSourceRect, rect, stageSize]);
+  const displayedCrop = realCrop ?? fullSourceRect;
 
   function isVideoFile(selected: SelectedMedia) {
     const ext = selected.name.split(".").pop()?.toLowerCase();
@@ -229,12 +241,7 @@ export function App() {
         setEditTool("crop");
         setDrawBoxes([]);
         setDraftBox(null);
-        setRect({
-          x: 24,
-          y: 24,
-          width: 180,
-          height: 160,
-        });
+        setRect(null);
       }
     }
     setStatus(info ? "媒体已载入" : "没有找到视频流");
@@ -256,7 +263,7 @@ export function App() {
       setEditTool("crop");
       setDrawBoxes([]);
       setDraftBox(null);
-      setRect({ x: 80, y: 60, width: 360, height: 240 });
+      setRect(null);
     }
     setStatus("准备好");
   }
@@ -386,19 +393,26 @@ export function App() {
       }
       setDraftBox(null);
     } else if (cropInfo) {
-      setRect((current) => ({
-        x: Math.max(0, Math.min(current.x, Math.max(0, stageSize.width - 2))),
-        y: Math.max(0, Math.min(current.y, Math.max(0, stageSize.height - 2))),
-        width: Math.max(2, Math.min(current.width, Math.max(2, stageSize.width - current.x))),
-        height: Math.max(2, Math.min(current.height, Math.max(2, stageSize.height - current.y))),
-      }));
+      setRect((current) =>
+        current
+          ? current.width > 4 && current.height > 4
+            ? {
+                x: Math.max(0, Math.min(current.x, Math.max(0, stageSize.width - 2))),
+                y: Math.max(0, Math.min(current.y, Math.max(0, stageSize.height - 2))),
+                width: Math.max(2, Math.min(current.width, Math.max(2, stageSize.width - current.x))),
+                height: Math.max(2, Math.min(current.height, Math.max(2, stageSize.height - current.y))),
+              }
+            : null
+          : null,
+      );
     }
     setIsDrawing(false);
     setDrawStart(null);
   }
 
   function realDrawBoxes() {
-    if (!cropInfo || !realCrop || stageSize.width <= 0 || stageSize.height <= 0) return [];
+    if (!cropInfo || !fullSourceRect || stageSize.width <= 0 || stageSize.height <= 0) return [];
+    const baseRect = rect && realCrop ? realCrop : fullSourceRect;
     const scaleX = cropInfo.width / stageSize.width;
     const scaleY = cropInfo.height / stageSize.height;
 
@@ -408,12 +422,12 @@ export function App() {
         const sourceY = box.y * scaleY;
         const sourceWidth = box.width * scaleX;
         const sourceHeight = box.height * scaleY;
-        const left = Math.max(sourceX, realCrop.x);
-        const top = Math.max(sourceY, realCrop.y);
-        const right = Math.min(sourceX + sourceWidth, realCrop.x + realCrop.width);
-        const bottom = Math.min(sourceY + sourceHeight, realCrop.y + realCrop.height);
-        const x = Math.round(left - realCrop.x);
-        const y = Math.round(top - realCrop.y);
+        const left = Math.max(sourceX, baseRect.x);
+        const top = Math.max(sourceY, baseRect.y);
+        const right = Math.min(sourceX + sourceWidth, baseRect.x + baseRect.width);
+        const bottom = Math.min(sourceY + sourceHeight, baseRect.y + baseRect.height);
+        const x = Math.round(left - baseRect.x);
+        const y = Math.round(top - baseRect.y);
         return {
           x,
           y,
@@ -426,14 +440,16 @@ export function App() {
   }
 
   async function exportCrop() {
-    if (!cropMedia || !realCrop) return;
+    if (!cropMedia || !fullSourceRect) return;
     const outputPath = await window.frameforge.selectOutput(cropMedia.name.replace(/\.[^.]+$/, "-edited.mp4"));
     if (!outputPath) return;
+    const cropRect = rect && realCrop ? realCrop : fullSourceRect;
 
     const payload: CropPayload = {
       inputPath: cropMedia.path,
       outputPath,
-      ...realCrop,
+      crop: Boolean(rect),
+      ...cropRect,
       boxes: realDrawBoxes(),
       crf: 23,
       preset: "medium",
@@ -784,7 +800,7 @@ export function App() {
                             }}
                           />
                         ) : null}
-                        {editTool === "crop" ? (
+                        {editTool === "crop" && rect ? (
                           <div
                             className="cropBox"
                             style={{
@@ -865,23 +881,23 @@ export function App() {
               <div className="cropNumbers">
                 <label>
                   X
-                  <input value={realCrop?.x ?? 0} readOnly />
+                  <input value={displayedCrop?.x ?? 0} readOnly />
                 </label>
                 <label>
                   Y
-                  <input value={realCrop?.y ?? 0} readOnly />
+                  <input value={displayedCrop?.y ?? 0} readOnly />
                 </label>
                 <label>
                   宽
-                  <input value={realCrop?.width ?? 0} readOnly />
+                  <input value={displayedCrop?.width ?? 0} readOnly />
                 </label>
                 <label>
                   高
-                  <input value={realCrop?.height ?? 0} readOnly />
+                  <input value={displayedCrop?.height ?? 0} readOnly />
                 </label>
               </div>
 
-              <button className="exportButton" disabled={!cropMedia || !realCrop || isBusy} onClick={exportCrop}>
+              <button className="exportButton" disabled={!cropMedia || isBusy} onClick={exportCrop}>
                 {isBusy ? <Loader2 className="spin" size={18} /> : <Scissors size={18} />}
                 导出编辑 MP4
               </button>

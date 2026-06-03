@@ -937,13 +937,13 @@ input {
 }
 
 .brandPill {
-  min-width: 318px;
-  min-height: 76px;
-  padding: 12px 22px;
+  min-width: 214px;
+  min-height: 62px;
+  padding: 13px 20px;
   color: #11151b;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid #d7dde4;
-  border-radius: 24px;
+  border-radius: 22px;
   box-shadow:
     0 16px 34px rgba(17, 21, 27, 0.14),
     inset 0 1px 0 #fff;
@@ -951,8 +951,8 @@ input {
 
 .brandMark {
   position: relative;
-  width: 258px;
-  height: 50px;
+  width: 168px;
+  height: 34px;
   flex: 0 0 auto;
   background: transparent;
   border: 0;
@@ -1566,7 +1566,7 @@ input {
 
 .drawBox {
   position: absolute;
-  opacity: 0.72;
+  opacity: 1;
   pointer-events: none;
 }
 
@@ -1581,7 +1581,7 @@ input {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px;
+  gap: 20px;
   min-height: 560px;
   color: #11151b;
   background:
@@ -1627,13 +1627,13 @@ input {
 }
 
 .uploadPanel strong {
-  min-width: 330px;
-  min-height: 82px;
+  min-width: 258px;
+  min-height: 66px;
   display: inline-grid;
   place-items: center;
-  padding: 0 52px;
+  padding: 0 42px;
   color: #1b3f42;
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 850;
   background: rgba(109, 133, 135, 0.13);
   border: 1.37px solid #d8e4e5;
@@ -1644,9 +1644,9 @@ input {
 }
 
 .uploadPanel span {
-  margin-top: 2px;
+  margin-top: -2px;
   color: rgba(27, 63, 66, 0.46);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
 }
 
