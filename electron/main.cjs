@@ -168,22 +168,18 @@ ipcMain.handle("probe-media", async (_event, filePath) => {
 ipcMain.handle("crop-mp4", async (_event, payload) => {
   const ffmpeg = resolveTool("ffmpeg");
   const filters = [];
-  if (payload.crop !== false) {
+  const shouldCrop = payload.crop !== false;
+  if (shouldCrop) {
     filters.push(`crop=${payload.width}:${payload.height}:${payload.x}:${payload.y}`);
   }
   const boxes = Array.isArray(payload.boxes) ? payload.boxes : [];
-  const drawBoxes = boxes
-    .map((box) => {
-      const color = String(box.color || "#c9ebe6").replace("#", "0x");
-      const x = Math.max(0, Math.round(Number(box.x || 0)));
-      const y = Math.max(0, Math.round(Number(box.y || 0)));
-      const width = Math.max(2, Math.round(Number(box.width || 2)));
-      const height = Math.max(2, Math.round(Number(box.height || 2)));
-      return `drawbox=x=${x}:y=${y}:w=${width}:h=${height}:color=${color}@1:t=fill`;
-    })
-    .join(",");
-  if (drawBoxes) {
-    filters.push(drawBoxes);
+  for (const box of boxes) {
+    const color = String(box.color || "#c9ebe6").replace("#", "0x");
+    const x = Math.max(0, Math.round(Number(box.x || 0)));
+    const y = Math.max(0, Math.round(Number(box.y || 0)));
+    const width = Math.max(2, Math.round(Number(box.width || 2)));
+    const height = Math.max(2, Math.round(Number(box.height || 2)));
+    filters.push(`drawbox=x=${x}:y=${y}:w=${width}:h=${height}:color=${color}:t=fill`);
   }
   const videoFilter = filters.join(",");
 
@@ -191,16 +187,24 @@ ipcMain.handle("crop-mp4", async (_event, payload) => {
     "-y",
     "-i",
     payload.inputPath,
+    "-map",
+    "0:v:0",
+    "-map",
+    "0:a?",
     "-c:v",
     "libx264",
     "-crf",
     String(payload.crf || 23),
     "-preset",
     payload.preset || "medium",
-    "-c:a",
-    payload.keepAudio ? "copy" : "aac",
     payload.outputPath,
   ];
+
+  if (payload.keepAudio) {
+    args.splice(args.length - 1, 0, "-c:a", "copy");
+  } else {
+    args.splice(args.length - 1, 0, "-an");
+  }
 
   if (videoFilter) {
     args.splice(3, 0, "-vf", videoFilter);

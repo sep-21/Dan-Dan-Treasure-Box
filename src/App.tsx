@@ -410,16 +410,11 @@ export function App() {
     setDrawStart(null);
   }
 
-  function cancelEditSession() {
+  function closeEditSession() {
     finishDraw();
-    if (editTool === "crop") {
-      setRect(null);
-    } else {
-      setDraftBox(null);
-      setDrawBoxes([]);
-    }
     setIsDrawing(false);
     setDrawStart(null);
+    setDraftBox(null);
     setIsCropEditing(false);
   }
 
@@ -775,11 +770,11 @@ export function App() {
                     <button
                       className="frameIconButton"
                       type="button"
-                      title={isCropEditing ? "取消编辑" : "编辑裁剪区域"}
-                      aria-label={isCropEditing ? "取消编辑" : "编辑裁剪区域"}
+                      title={isCropEditing ? "退出编辑" : "编辑视频"}
+                      aria-label={isCropEditing ? "退出编辑" : "编辑视频"}
                       onClick={() => {
                         if (isCropEditing) {
-                          cancelEditSession();
+                          closeEditSession();
                           return;
                         }
                         setIsCropEditing((current) => !current);
