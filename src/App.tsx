@@ -758,8 +758,7 @@ export function App() {
               {!cropMedia ? (
                 <button className="uploadPanel" onClick={selectMedia} onDragOver={allowDrop} onDrop={handleDrop} disabled={isLoadingMedia}>
                   {isLoadingMedia ? <Loader2 className="spin uploadSpinner" size={48} /> : <UploadGlyph />}
-                  <strong>{isLoadingMedia ? "正在上传文件" : "上传文件"}</strong>
-                  <span>点击此处选择视频文件</span>
+                  <span>{isLoadingMedia ? "正在读取视频文件..." : "点击此处选择视频文件"}</span>
                 </button>
               ) : (
                 <section className="mediaPane singleMediaPane">
@@ -976,8 +975,7 @@ export function App() {
                   disabled={isLoadingMedia}
                 >
                   {isLoadingMedia ? <Loader2 className="spin uploadSpinner" size={48} /> : <UploadGlyph />}
-                  <strong>{isLoadingMedia ? "正在上传文件" : "上传文件"}</strong>
-                  <span>拖拽文件到此处或点击上传</span>
+                  <span>{isLoadingMedia ? "正在读取动图文件..." : "拖拽文件到此处或点击上传"}</span>
                 </button>
               ) : (
                 <div className="animationPreview">
@@ -1069,8 +1067,7 @@ export function App() {
                   disabled={isLoadingMedia}
                 >
                   {isLoadingMedia ? <Loader2 className="spin uploadSpinner" size={48} /> : <UploadGlyph />}
-                  <strong>{isLoadingMedia ? "正在上传文件" : "上传文件"}</strong>
-                  <span>选择 MP4 / MOV / WebM / MKV 视频</span>
+                  <span>{isLoadingMedia ? "正在读取视频文件..." : "选择 MP4 / MOV / WebM / MKV 视频"}</span>
                 </button>
               ) : (
                 <div className="animationPreview">

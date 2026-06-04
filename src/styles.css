@@ -197,15 +197,6 @@ h2 {
   border-radius: 8px;
 }
 
-.uploadPanel strong {
-  padding: 12px 48px;
-  color: #fff;
-  font-size: 22px;
-  background: #258ee9;
-  border: 2px solid #63bcff;
-  border-radius: 8px;
-}
-
 .uploadPanel span {
   color: #7d859d;
   font-weight: 700;
@@ -1590,7 +1581,7 @@ input {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 38px;
   min-height: 560px;
   color: #11151b;
   background:
@@ -1635,25 +1626,7 @@ input {
     inset 0 1px 0 #fff;
 }
 
-.uploadPanel strong {
-  min-width: 220px;
-  min-height: 54px;
-  display: inline-grid;
-  place-items: center;
-  padding: 0 34px;
-  color: #1b3f42;
-  font-size: 25px;
-  font-weight: 850;
-  background: rgba(109, 133, 135, 0.13);
-  border: 1.37px solid #d8e4e5;
-  border-radius: 69.643px;
-  box-shadow:
-    0 18px 42px rgba(27, 63, 66, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
-}
-
 .uploadPanel span {
-  margin-top: -4px;
   color: rgba(27, 63, 66, 0.46);
   font-size: 17px;
   font-weight: 650;
