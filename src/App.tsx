@@ -472,22 +472,26 @@ export function App() {
     const outputPath = await window.frameforge.selectOutput(cropMedia.name.replace(/\.[^.]+$/, "-edited.mp4"));
     if (!outputPath) return;
     const cropRect = rect && realCrop ? realCrop : fullSourceRect;
+    const exportBoxes = realDrawBoxes();
 
     const payload: CropPayload = {
       inputPath: cropMedia.path,
       outputPath,
       crop: Boolean(rect),
       ...cropRect,
-      boxes: realDrawBoxes(),
+      boxes: exportBoxes,
       crf: 23,
       preset: "medium",
       keepAudio: true,
     };
 
     setIsBusy(true);
-    setStatus("正在用 FFmpeg 导出编辑视频...");
+    setStatus(exportBoxes.length > 0 ? `正在导出 ${exportBoxes.length} 个黑色填充矩形...` : "正在用 FFmpeg 导出编辑视频...");
     try {
-      await window.frameforge.cropMp4(payload);
+      const result = await window.frameforge.cropMp4(payload);
+      if (result.appliedBoxes !== exportBoxes.length) {
+        throw new Error(`矩形导出失败：预期 ${exportBoxes.length} 个，实际应用 ${result.appliedBoxes} 个`);
+      }
       const exported = await window.frameforge.mediaFromPath(outputPath);
       setLastCroppedMedia(exported);
       setCompletedResult("crop", "编辑完成", exported);
@@ -840,6 +844,31 @@ export function App() {
                             }}
                           />
                         ) : null}
+                      </div>
+                    ) : drawBoxes.length > 0 ? (
+                      <div
+                        className="cropStage previewStage"
+                        ref={cropStageRef}
+                        style={{
+                          aspectRatio: cropInfo ? `${cropInfo.width} / ${cropInfo.height}` : "16 / 9",
+                          height: cropInfo && cropInfo.width < cropInfo.height ? "100%" : undefined,
+                          width: cropInfo && cropInfo.width >= cropInfo.height ? "100%" : undefined,
+                        }}
+                      >
+                        <video className="cropMedia previewCropMedia" src={cropMedia.url} controls />
+                        {drawBoxes.map((box) => (
+                          <div
+                            className="drawBox"
+                            key={box.id}
+                            style={{
+                              backgroundColor: FILL_BOX_COLOR,
+                              left: `${box.x}px`,
+                              top: `${box.y}px`,
+                              width: `${Math.max(2, box.width)}px`,
+                              height: `${Math.max(2, box.height)}px`,
+                            }}
+                          />
+                        ))}
                       </div>
                     ) : (
                       renderMediaPreview(cropMedia, "playbackMedia")

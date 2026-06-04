@@ -51,7 +51,7 @@ declare global {
       getDroppedFilePath: (file: File) => string;
       selectOutput: (defaultName: string) => Promise<string | null>;
       probeMedia: (filePath: string) => Promise<any>;
-      cropMp4: (payload: CropPayload) => Promise<{ outputPath: string }>;
+      cropMp4: (payload: CropPayload) => Promise<{ outputPath: string; appliedBoxes: number; videoFilter: string }>;
       compressAnimation: (payload: CompressPayload) => Promise<{ outputPath: string }>;
       videoToGif: (payload: VideoToGifPayload) => Promise<{ outputPath: string }>;
       toolStatus: () => Promise<Record<string, { command: string; exists: boolean }>>;
