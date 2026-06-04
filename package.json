@@ -8,7 +8,7 @@
     "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && electron .\"",
     "build": "tsc && vite build",
     "start": "electron .",
-    "dist:win": "npm run build && npx electron-builder@26.0.12 --win nsis portable",
+    "dist:win": "npm run build && npx electron-builder@26.0.12 --win nsis portable --publish never",
     "dist:mac": "npm run build && npx electron-builder@26.0.12 --mac dmg"
   },
   "build": {
@@ -26,12 +26,15 @@
       "target": [
         "nsis",
         "portable"
-      ],
-      "artifactName": "FrameForge-${version}-${arch}.${ext}"
+      ]
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "FrameForge-Setup-${version}-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "FrameForge-Portable-${version}-${arch}.${ext}"
     },
     "mac": {
       "target": "dmg"
