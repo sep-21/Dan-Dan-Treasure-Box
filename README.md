@@ -27,6 +27,18 @@ Implemented in this prototype:
 - Project-local media binaries, so Mac development no longer requires Homebrew FFmpeg.
 - Windows build workflow via GitHub Actions.
 
+## Download For Windows
+
+Download the latest public Windows release from:
+
+https://github.com/sep-21/Dan-Dan-Treasure-Box/releases/latest
+
+- `FrameForge-Setup-*.exe`: recommended installer.
+- `FrameForge-Portable-*.exe`: portable version that runs without installation.
+
+Windows may show a SmartScreen warning because the app is not code-signed yet.
+Only continue when the file was downloaded from this repository.
+
 Not finished yet:
 
 - Real progress parsing.
@@ -71,10 +83,10 @@ Build Windows packages:
 npm run dist:win
 ```
 
-The recommended release path is GitHub Actions. Push the repo to GitHub, open the
-`Windows Build` workflow, run it, and download the `FrameForge-Windows` artifact.
-That workflow runs on `windows-latest`, installs dependencies, builds the Vite
-renderer, and creates NSIS plus portable Windows packages.
+The recommended release path is GitHub Actions. Push a version tag such as
+`v0.1.0` to create a public GitHub Release with installer and portable downloads.
+Regular pushes to `main` still create the private-to-GitHub `FrameForge-Windows`
+Actions artifact for build verification.
 
 If Electron binary download hangs, use a mirror:
 
